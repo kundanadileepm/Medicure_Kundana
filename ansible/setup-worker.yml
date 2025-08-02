@@ -1,0 +1,45 @@
+- hosts: worker
+  become: yes
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install Git, Java, Maven, Docker
+      apt:
+        name: [git, openjdk-17-jdk, maven, docker.io]
+        state: present
+
+    - name: Install Jenkins
+      shell: |
+        wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | apt-key add -
+        sh -c 'echo deb https://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
+        apt update
+        apt install -y jenkins
+      args:
+        executable: /bin/bash
+
+    - name: Start Jenkins
+      service:
+        name: jenkins
+        state: started
+        enabled: yes
+
+    - name: Install Node Exporter
+      shell: |
+        wget https://github.com/prometheus/node_exporter/releases/download/v1.6.1/node_exporter-1.6.1.linux-amd64.tar.gz
+        tar xvfz node_exporter-*.tar.gz
+        mv node_exporter-*/node_exporter /usr/local/bin/
+        useradd -rs /bin/false node_exporter
+        echo "[Unit]
+        Description=Node Exporter
+        [Service]
+        User=node_exporter
+        ExecStart=/usr/local/bin/node_exporter
+        [Install]
+        WantedBy=default.target" > /etc/systemd/system/node_exporter.service
+        systemctl daemon-reexec
+        systemctl enable node_exporter
+        systemctl start node_exporter
+      args:
+        executable: /bin/bash
