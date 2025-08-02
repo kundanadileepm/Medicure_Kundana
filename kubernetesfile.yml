@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: medicure
-          image: kundanadileepm/medicure-app:latest
+          image: kundanadileepm/medicure-app:v1
           ports:
             - containerPort: 8082
           env:
