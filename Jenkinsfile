@@ -15,15 +15,7 @@ pipeline {
                 sh 'mvn clean package'
             }
         }
-
-        stage('Buildkit') {
-            steps {
-                echo 'Docker_builderkit'
-                sh 'export DOCKER_BUILDKIT=1 && docker build -t kundanadileepm/medicure-app:latest .'
-
-            }
-        }
-        
+      
         stage('Build Docker Image') {
             steps {
                 echo 'Building Docker image'
